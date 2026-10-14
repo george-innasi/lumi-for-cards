@@ -99,7 +99,6 @@ export default function LumiPrototype() {
         </header>
 
         <main className="p-10 max-w-6xl mx-auto w-full space-y-10">
-          {/* Welcome Banner */}
           <div className="bg-[#003366] rounded-3xl p-8 text-white flex items-center justify-between relative overflow-hidden shadow-xl">
              <div className="relative z-10">
                 <h2 className="text-3xl font-black mb-2 tracking-tight">Ready for a consultation?</h2>
@@ -109,7 +108,6 @@ export default function LumiPrototype() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-            {/* Quick Cards */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-5 font-bold"><CreditCard/></div>
                <h3 className="font-bold text-slate-800 mb-2 uppercase text-xs tracking-wider">Top Card Policies</h3>
@@ -205,7 +203,7 @@ export default function LumiPrototype() {
                         <div className="text-[11px] font-black text-[#003366] flex items-center gap-2 uppercase truncate">
                           <BookOpen size={14} className="shrink-0"/> {m.source}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-1 font-bold italic">{m.pages} • Branch Doc Repository</div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-bold italic text-xs">{m.pages} • Branch Doc Repository</div>
                       </div>
                       <ExternalLink size={14} className="text-slate-300 group-hover:text-blue-600 transition-colors shrink-0"/>
                     </button>
@@ -236,7 +234,6 @@ export default function LumiPrototype() {
 
         {/* INPUT & QUICK ACTIONS AREA */}
         <div className="p-6 bg-white border-t border-slate-200 shadow-2xl">
-          {/* Quick Query Grid (Section 2.1 US1-US5 Buttons) */}
           <div className="grid grid-cols-2 gap-3 mb-5">
             {QUICK_ACTIONS.map((q) => (
               <button 
