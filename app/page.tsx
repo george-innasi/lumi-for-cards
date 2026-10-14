@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MessageSquare, ThumbsUp, ThumbsDown, ExternalLink, BookOpen, Send, ShieldAlert, AlertCircle, CreditCard, ShieldCheck, Zap, HelpCircle, FileText, Globe } from 'lucide-react';
+import { Search, MessageSquare, ThumbsUp, ThumbsDown, ExternalLink, BookOpen, Send, ShieldCheck, AlertCircle, CreditCard, Shield, Zap, FileText, Globe, LifeBuoy } from 'lucide-react';
 
-// --- KNOWLEDGE BASE ---
+// --- KNOWLEDGE BASE DATA ---
 const KNOWLEDGE_BASE = [
   {
     id: "doc_1",
@@ -26,16 +26,16 @@ const KNOWLEDGE_BASE = [
   }
 ];
 
-const SUGGESTED_QUESTIONS = [
+const QUICK_ACTIONS = [
   { label: "US1: Rates & Fees", query: "What are the fees for the Infinite Visa?" },
-  { label: "US2: Insurance Limits", query: "What is the car rental damage limit?" },
-  { label: "US3: Card Benefits", query: "Compare CashBack vs Air Miles rewards." },
-  { label: "US4: Promo Offers", query: "Are there any active balance transfer offers?" }
+  { label: "US2: Insurance", query: "What is the car rental damage limit?" },
+  { label: "US3: Card Perks", query: "What are the earn rates for CashBack?" },
+  { label: "US4: Promos", query: "Are there any balance transfer offers?" }
 ];
 
 export default function LumiPrototype() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello George. I am Lumi, your BMO Credit Card Assistant. Select a topic below or ask a specific policy question.', type: 'text' }
+    { role: 'assistant', content: 'Hello George. I am Lumi, your BMO Credit Card Assistant. Select a suggested query below or ask a specific policy question.', type: 'text' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -47,27 +47,26 @@ export default function LumiPrototype() {
     const queryToProcess = forcedQuery || input;
     if (!queryToProcess.trim()) return;
 
-    const userQuery = queryToProcess.toLowerCase();
     setMessages(prev => [...prev, { role: 'user', content: queryToProcess }]);
     setInput('');
     setIsTyping(true);
 
     setTimeout(() => {
       let response: any = { role: 'assistant', type: 'answer' };
+      const q = queryToProcess.toLowerCase();
       
-      if (/(?:\d{4}[- ]?){3}\d{4}|(?:\d{3}[- ]?){3}/.test(userQuery)) {
+      if (/(?:\d{4}[- ]?){3}\d{4}|(?:\d{3}[- ]?){3}/.test(q)) {
         response.content = "This assistant cannot process customer personal information. Please remove any sensitive data.";
         response.type = 'error';
       } 
-      else if (userQuery.match(/mortgage|loan|gic|pin reset/)) {
+      else if (q.match(/mortgage|loan|gic|pin reset/)) {
         response.content = "This assistant covers credit card benefits and insurance only. For mortgage and lending, see the Lending Policy library.";
         response.type = 'redirect';
       }
       else {
-        const foundDoc = KNOWLEDGE_BASE.find(doc => doc.keywords.some(k => userQuery.includes(k)));
-        if (foundDoc) {
-          response = { ...response, ...foundDoc };
-        } else {
+        const foundDoc = KNOWLEDGE_BASE.find(doc => doc.keywords.some(k => q.includes(k)));
+        if (foundDoc) response = { ...response, ...foundDoc };
+        else {
           response.content = "I cannot answer this from the active knowledge base. Confirm it in the source document or escalate to Branch Support.";
           response.type = 'refusal';
         }
@@ -78,104 +77,121 @@ export default function LumiPrototype() {
   };
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] font-sans text-slate-800">
+    <div className="flex h-screen bg-[#F1F5F9] font-sans text-slate-800 overflow-hidden">
       
-      {/* LEFT SIDE: THE KNOWLEDGE HUB PORTAL */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-[#003366] rounded-full flex items-center justify-center text-white font-bold text-xs">BMO</div>
-            <span className="font-bold text-slate-700 tracking-tight text-sm uppercase">Card Services Knowledge Hub</span>
+      {/* LEFT SIDE: THE POLICY HUB DASHBOARD */}
+      <div className="flex-1 flex flex-col overflow-y-auto">
+        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 shadow-sm shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-[#003366] rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg">BMO</div>
+            <div>
+              <h1 className="font-black text-slate-800 tracking-tight text-lg leading-none">CARD SERVICES HUB</h1>
+              <span className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-1 block">Policy Knowledge Base</span>
+            </div>
           </div>
-          <div className="flex items-center gap-6 text-sm text-slate-500">
-            <div className="flex items-center gap-1"><Globe size={14}/> EN / FR</div>
-            <span className="font-medium">George Innasi (Personal Banker)</span>
+          <div className="flex items-center gap-6">
+            <div className="bg-slate-100 p-2 rounded-lg flex items-center gap-2 px-4 border border-slate-200">
+                <Search size={16} className="text-slate-400"/>
+                <input type="text" placeholder="Global Search..." className="bg-transparent border-none outline-none text-xs w-48 font-medium"/>
+            </div>
+            <span className="text-sm font-bold text-slate-600 bg-white px-3 py-1.5 rounded-full border border-slate-200">George Innasi</span>
           </div>
         </header>
 
-        <main className="p-8 overflow-y-auto">
-          <div className="max-w-5xl mx-auto space-y-8">
-            <section>
-              <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <zap size={20} className="text-amber-500 fill-amber-500"/> Featured Policy Updates
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 transition-colors cursor-pointer">
-                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4"><ShieldCheck size={20}/></div>
-                  <h3 className="font-bold text-sm mb-2">Travel Insurance v2026</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">Updated collision coverage MSRP limits for Infinite cardholders.</p>
-                </div>
-                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 transition-colors cursor-pointer">
-                  <div className="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center mb-4"><CreditCard size={20}/></div>
-                  <h3 className="font-bold text-sm mb-2">Rewards Earn Rates</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">New 5% grocery accelerators active for CashBack Mastercard accounts.</p>
-                </div>
-                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 transition-colors cursor-pointer">
-                  <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center mb-4"><Zap size={20}/></div>
-                  <h3 className="font-bold text-sm mb-2">Promotional APRs</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">New balance transfer windows for Q3 customer retention campaigns.</p>
-                </div>
-              </div>
-            </section>
+        <main className="p-10 max-w-6xl mx-auto w-full space-y-10">
+          {/* Welcome Banner */}
+          <div className="bg-[#003366] rounded-3xl p-8 text-white flex items-center justify-between relative overflow-hidden shadow-xl">
+             <div className="relative z-10">
+                <h2 className="text-3xl font-black mb-2 tracking-tight">Ready for a consultation?</h2>
+                <p className="text-blue-100 font-medium max-w-md">Lumi is active on the right sidebar to assist with real-time card policy, insurance, and interest rate lookups.</p>
+             </div>
+             <Shield size={120} className="absolute -right-8 -bottom-8 text-white/5 rotate-12" />
+          </div>
 
-            <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                <h3 className="font-bold text-sm text-slate-700 uppercase tracking-wider">Master Document Library</h3>
-                <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full font-bold">428 DOCUMENTS</span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {['Cardholder Agreements', 'Certificates of Insurance', 'Fee Schedules', 'Marketing Guidelines'].map(doc => (
-                  <div key={doc} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <FileText size={18} className="text-slate-400 group-hover:text-blue-500"/>
-                      <span className="text-sm font-medium">{doc}</span>
+          <div className="grid grid-cols-3 gap-6">
+            {/* Quick Cards */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+               <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-5 font-bold"><CreditCard/></div>
+               <h3 className="font-bold text-slate-800 mb-2 uppercase text-xs tracking-wider">Top Card Policies</h3>
+               <p className="text-xs text-slate-500 mb-4">View MSRP limits, earn rates, and annual fees for retail card products.</p>
+               <button className="text-[10px] font-black text-[#003366] hover:underline">BROWSE CARDS →</button>
+            </div>
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+               <div className="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-5 font-bold"><ShieldCheck/></div>
+               <h3 className="font-bold text-slate-800 mb-2 uppercase text-xs tracking-wider">Insurance Matrix</h3>
+               <p className="text-xs text-slate-500 mb-4">Collision Damage, Travel Medical, and Purchase Protection certificates.</p>
+               <button className="text-[10px] font-black text-[#003366] hover:underline">VIEW COVERAGE →</button>
+            </div>
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+               <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-5 font-bold"><Zap/></div>
+               <h3 className="font-bold text-slate-800 mb-2 uppercase text-xs tracking-wider">Rate Specials</h3>
+               <p className="text-xs text-slate-500 mb-4">Check current balance transfer and introductory APR promotional windows.</p>
+               <button className="text-[10px] font-black text-[#003366] hover:underline">CHECK PROMOS →</button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+             <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 className="font-black text-xs text-slate-600 tracking-widest uppercase italic">Master Library Access</h3>
+                <div className="flex gap-2">
+                    <span className="text-[10px] bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-black">ACTIVE CORPUS</span>
+                </div>
+             </div>
+             <div className="p-2 divide-y divide-slate-50">
+                {['Cardholder Agreements (Retail)', 'Insurance Certificates & T&Cs', 'Branch Fee Disclosure Tables', 'Marketing Compliance Guide'].map(item => (
+                  <div key={item} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-all rounded-xl group">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-slate-100 rounded text-slate-400 group-hover:text-blue-600 transition-colors"><FileText size={18}/></div>
+                        <span className="text-sm font-bold text-slate-700">{item}</span>
                     </div>
-                    <ExternalLink size={14} className="text-slate-300"/>
+                    <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-[10px] font-bold text-slate-400 italic">v2026.1 Updated</span>
+                        <ExternalLink size={14} className="text-slate-400"/>
+                    </div>
                   </div>
                 ))}
-              </div>
-            </section>
+             </div>
           </div>
         </main>
       </div>
 
-      {/* RIGHT SIDE: THE LUMI ASSISTANT */}
-      <div className="w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-2xl relative z-20">
-        <div className="p-4 bg-[#003366] text-white flex items-center justify-between shadow-lg">
-          <div className="flex items-center gap-2">
-            <div className="p-1 bg-blue-500/20 rounded shadow-inner">
-              <MessageSquare size={18} className="text-blue-200" />
+      {/* RIGHT SIDE: THE LUMI ASSISTANT SIDEBAR */}
+      <div className="w-[500px] bg-white border-l border-slate-200 flex flex-col shadow-2xl z-30">
+        <div className="p-5 bg-[#003366] text-white flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-400/20 rounded-lg border border-white/10">
+              <MessageSquare size={20} className="text-blue-100" />
             </div>
             <div>
-              <h2 className="font-bold text-sm tracking-tight leading-none">LUMI ASSISTANT</h2>
-              <span className="text-[9px] text-blue-300 font-bold uppercase tracking-widest">Policy Support AI</span>
+              <h2 className="font-black text-sm tracking-tighter leading-none">LUMI ASSISTANT</h2>
+              <span className="text-[9px] text-blue-300 font-black uppercase tracking-widest mt-1 block">Verified Answer Engine</span>
             </div>
           </div>
-          <div className="text-[10px] bg-white/10 px-2 py-1 rounded font-bold border border-white/10 uppercase tracking-tighter">PHASE 0</div>
+          <div className="text-[9px] bg-white/10 px-2 py-1 rounded font-black border border-white/5 uppercase">Phase 0 Beta</div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-white">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-white scroll-smooth">
           {messages.map((m, idx) => (
             <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start animate-in fade-in slide-in-from-bottom-2'}`}>
-              <div className={`max-w-[92%] ${m.role === 'user' ? 'bg-[#003366] text-white rounded-2xl rounded-tr-none px-4 py-3 shadow-md' : 'bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-none p-5'}`}>
+              <div className={`max-w-[95%] ${m.role === 'user' ? 'bg-[#003366] text-white rounded-2xl rounded-tr-none px-5 py-3 shadow-lg' : 'bg-[#F8FAFC] border border-slate-100 rounded-2xl rounded-tl-none p-6 shadow-sm'}`}>
                 
-                {m.date && <p className="text-[9px] font-black text-slate-400 mb-3 uppercase tracking-widest border-b border-slate-200 pb-1 flex items-center gap-1.5">
-                  <ShieldCheck size={10} className="text-blue-500"/> Source Effective {m.date}
+                {m.date && <p className="text-[10px] font-black text-blue-600/60 mb-3 uppercase tracking-widest flex items-center gap-2 border-b border-blue-100 pb-2">
+                  <Shield size={12}/> SOURCE EFFECTIVE: {m.date}
                 </p>}
                 
-                {m.type === 'error' && <AlertCircle size={20} className="text-red-500 mb-2" />}
+                {m.type === 'error' && <AlertCircle size={20} className="text-red-500 mb-3" />}
 
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{m.content}</p>
+                <p className="text-[13px] leading-relaxed font-medium text-slate-700 whitespace-pre-wrap">{m.content}</p>
 
                 {m.conditions && (
                   <div className="mt-5 space-y-2">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-tight flex items-center gap-1">
-                      <HelpCircle size={10}/> Conditions & Exclusions:
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tight flex items-center gap-2">
+                      <LifeBuoy size={12}/> Policy Details & Caveats:
                     </p>
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-2 pl-1">
                       {m.conditions.map((c, i) => (
-                        <li key={i} className="text-xs text-slate-600 flex gap-2">
-                          <span className="text-blue-500 font-bold">•</span> {c}
+                        <li key={i} className="text-[12px] text-slate-600 flex gap-2 font-medium">
+                          <span className="text-blue-500 font-black">•</span> {c}
                         </li>
                       ))}
                     </ul>
@@ -183,16 +199,23 @@ export default function LumiPrototype() {
                 )}
 
                 {m.source && (
-                  <div className="mt-6 pt-4 border-t border-slate-200">
-                    <button className="w-full text-left p-2.5 rounded-lg bg-white border border-slate-200 hover:border-blue-400 transition-all shadow-sm flex items-center justify-between group">
+                  <div className="mt-6 pt-5 border-t border-slate-200">
+                    <button className="w-full text-left p-3 rounded-xl bg-white border border-slate-100 hover:border-blue-400 transition-all shadow-sm flex items-center justify-between group">
                       <div className="overflow-hidden">
-                        <div className="text-[10px] font-black text-[#003366] flex items-center gap-1.5 uppercase truncate">
-                          <BookOpen size={12}/> {m.source}
+                        <div className="text-[11px] font-black text-[#003366] flex items-center gap-2 uppercase truncate">
+                          <BookOpen size={14} className="shrink-0"/> {m.source}
                         </div>
-                        <div className="text-[9px] text-slate-400 mt-0.5">{m.pages} • Verified Asset</div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-bold italic">{m.pages} • Branch Doc Repository</div>
                       </div>
-                      <ExternalLink size={12} className="text-slate-300 group-hover:text-blue-500"/>
+                      <ExternalLink size={14} className="text-slate-300 group-hover:text-blue-600 transition-colors shrink-0"/>
                     </button>
+                  </div>
+                )}
+
+                {m.role === 'assistant' && idx > 0 && (
+                  <div className="mt-4 flex items-center gap-4 border-t border-slate-50 pt-4">
+                    <button className="text-slate-300 hover:text-blue-600 transition-colors"><ThumbsUp size={16} /></button>
+                    <button className="text-slate-300 hover:text-red-600 transition-colors"><ThumbsDown size={16} /></button>
                   </div>
                 )}
               </div>
@@ -200,38 +223,38 @@ export default function LumiPrototype() {
           ))}
           {isTyping && (
             <div className="flex items-center gap-3 text-slate-400 p-2">
-              <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
               </div>
-              <span className="text-[9px] font-black uppercase tracking-widest animate-pulse">Retrieving Policy Data...</span>
+              <span className="text-[10px] font-black uppercase tracking-widest animate-pulse italic text-blue-500">Retrieving Policy Data...</span>
             </div>
           )}
           <div ref={scrollRef} />
         </div>
 
-        {/* INPUT & QUICK ACTIONS */}
-        <div className="p-4 bg-white border-t border-slate-200 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
-          {/* Quick Start Grid */}
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            {SUGGESTED_QUESTIONS.map((q) => (
+        {/* INPUT & QUICK ACTIONS AREA */}
+        <div className="p-6 bg-white border-t border-slate-200 shadow-2xl">
+          {/* Quick Query Grid (Section 2.1 US1-US5 Buttons) */}
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            {QUICK_ACTIONS.map((q) => (
               <button 
                 key={q.label}
                 onClick={() => handleSend(q.query)}
-                className="text-left px-3 py-2 border border-slate-100 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all group"
+                className="text-left px-3 py-2.5 border border-slate-100 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all group shadow-sm bg-slate-50/30"
               >
-                <div className="text-[9px] font-black text-slate-400 uppercase group-hover:text-blue-500">{q.label}</div>
-                <div className="text-[10px] text-slate-600 truncate">{q.query}</div>
+                <div className="text-[9px] font-black text-slate-400 uppercase tracking-tighter group-hover:text-blue-600">{q.label}</div>
+                <div className="text-[10px] text-slate-700 font-bold truncate mt-0.5">{q.query}</div>
               </button>
             ))}
           </div>
 
-          <div className="relative">
+          <div className="relative group">
             <textarea 
               rows={1}
               placeholder="Ask about rewards, insurance, or card terms..."
-              className="w-full p-4 pr-14 rounded-xl border border-slate-200 focus:border-[#003366] focus:ring-4 focus:ring-blue-50 outline-none text-sm transition-all resize-none shadow-sm bg-slate-50/50"
+              className="w-full p-4 pr-16 rounded-2xl border border-slate-200 focus:border-[#003366] focus:ring-4 focus:ring-blue-50 outline-none text-sm transition-all resize-none shadow-sm bg-slate-50/50 font-medium"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
@@ -239,17 +262,17 @@ export default function LumiPrototype() {
             <button 
               onClick={() => handleSend()}
               disabled={!input.trim()}
-              className="absolute right-3 bottom-3 p-2 bg-[#003366] text-white rounded-lg hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-md"
+              className="absolute right-3.5 bottom-3.5 p-2 bg-[#003366] text-white rounded-xl hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-lg flex items-center justify-center"
             >
-              <Send size={18} />
+              <Send size={20} />
             </button>
           </div>
           
-          <div className="flex items-center justify-between mt-4 px-1">
-            <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-              <ShieldCheck size={12} className="text-blue-500"/> Policy Guardrails Active
+          <div className="flex items-center justify-between mt-5 px-1">
+            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+              <ShieldCheck size={14} className="text-blue-500"/> Verified Policy Guardrails Active
             </div>
-            <span className="text-[9px] text-slate-300 italic font-medium">BMO Card Services Team v1.0</span>
+            <span className="text-[9px] text-slate-400 italic font-bold uppercase tracking-tighter opacity-50">Branch Retail Tool</span>
           </div>
         </div>
       </div>
