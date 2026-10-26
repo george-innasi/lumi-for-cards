@@ -189,7 +189,7 @@ export default function LumiPrototype() {
                 {m.type === 'error' && <AlertCircle size={20} className="text-red-500 mb-3" />}
                 {m.type === 'clarification' && <Fingerprint size={20} className="text-amber-500 mb-3" />}
 
-                <p className="text-[13px] leading-relaxed font-medium text-slate-700 whitespace-pre-wrap">{m.content}</p>
+                <p className={`text-[13px] leading-relaxed font-medium whitespace-pre-wrap ${m.role === 'user' ? 'text-white' : 'text-slate-700'}`}>{m.content}</p>
 
                 {m.conditions && (
                   <div className="mt-5 space-y-2">
